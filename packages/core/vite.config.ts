@@ -1,5 +1,4 @@
 import { resolve } from 'node:path';
-import libAssetsPlugin from '@laynezh/vite-plugin-lib-assets';
 import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vitest/config';
 
@@ -12,6 +11,8 @@ export default defineConfig({
     build: {
         target: 'chrome70',
         outDir: 'lib',
+        // Inline all assets as base64 for better bundler compatibility (Meteor, etc.)
+        assetsInlineLimit: 100000, // 100KB - inline all icons
         lib: {
             entry: resolve(dirname, 'src/index.ts'),
             name: pkg.name,
@@ -31,10 +32,6 @@ export default defineConfig({
             entryRoot: 'src',
             outDir: 'lib/types',
         }),
-        libAssetsPlugin({
-            outputPath: (url) => {
-                return url.endsWith('.png') ? 'assets/icons' : 'assets/fonts';
-            },
-        }),
+        // Removed libAssetsPlugin - we inline assets instead for better compatibility
     ],
 });
