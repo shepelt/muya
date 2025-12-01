@@ -683,10 +683,13 @@ class ParagraphContent extends Format {
     }
 
     override insertTab() {
+        const cursor = this.getCursor();
+        if (!cursor) return;
+
         const { muya, text } = this;
         const { tabSize } = muya.options;
         const tabCharacter = String.fromCharCode(160).repeat(tabSize);
-        const { start, end } = this.getCursor()!;
+        const { start, end } = cursor;
 
         if (this.isCollapsed) {
             this.text

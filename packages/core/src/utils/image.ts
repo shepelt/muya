@@ -34,41 +34,38 @@ export function getImageSrc(src: string) {
         = /^data:image\/[\w+-]+(;[\w-]+=[\w-]+|;base64)*,[a-zA-Z0-9+/]+={0,2}$/;
     const imageExtension = EXT_REG.test(src);
     const isUrl = URL_REG.test(src);
-    if (imageExtension) {
-        if (isUrl) {
-            return {
-                isUnknownType: false,
-                src,
-            };
-        }
-        else {
-            return {
-                isUnknownType: false,
-                src: `file://${src}`,
-            };
-        }
-    }
-    else if (isUrl && !imageExtension) {
+
+    // Handle HTTP(S) URLs - accept all URLs regardless of extension
+    // Let the browser and content-type checks handle validation
+    if (isUrl) {
         return {
-            isUnknownType: true,
+            isUnknownType: false,
             src,
         };
     }
-    else {
-        const isDataUrl = DATA_URL_REG.test(src);
-        if (isDataUrl) {
-            return {
-                isUnknownType: false,
-                src,
-            };
-        }
-        else {
-            return {
-                isUnknownType: false,
-                src: '',
-            };
-        }
+
+    // Handle local file paths with extensions
+    if (imageExtension) {
+        return {
+            isUnknownType: false,
+            src: `file://${src}`,
+        };
     }
+
+    // Handle data URLs
+    const isDataUrl = DATA_URL_REG.test(src);
+    if (isDataUrl) {
+        return {
+            isUnknownType: false,
+            src,
+        };
+    }
+
+    // Empty or invalid src
+    return {
+        isUnknownType: false,
+        src: '',
+    };
 }
 
 export async function loadImage(url: string, detectContentType = false): Promise<{

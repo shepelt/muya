@@ -131,6 +131,27 @@ class JSONState {
         return mdGenerator.generate(state);
     }
 
+    /**
+     * Synchronously flush any pending operations to ensure state is up-to-date.
+     * This is useful before getting content when you need the absolute latest state.
+     */
+    flush() {
+        if (this._operationCache.length === 0) return;
+
+        const op = this._operationCache.reduce(json1.type.compose as any);
+        const prevDoc = this.getState();
+        this.apply(op);
+        const doc = this.getState();
+        this.muya.eventCenter.emit('json-change', {
+            op,
+            source: 'user',
+            prevDoc,
+            doc,
+        });
+        this._operationCache = [];
+        this._isGoing = false;
+    }
+
     private _emitStateChange() {
         if (this._isGoing)
             return;

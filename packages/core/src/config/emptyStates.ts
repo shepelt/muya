@@ -98,7 +98,7 @@ const emptyStates = {
         name: 'order-list',
         meta: {
             start: 1, // 0 ~ 999999999
-            loose: true, // true or false, true is loose list and false is tight.
+            loose: false, // true or false, true is loose list and false is tight.
             delimiter: '.', // . or )
         },
         children: [

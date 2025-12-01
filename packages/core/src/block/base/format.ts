@@ -39,6 +39,33 @@ interface IOffsetWithDelta extends IOffset {
 
 const debug = logger('block.format:');
 
+/**
+ * Find word boundaries around a given offset in text.
+ * Used for Typora-style behavior where formatting shortcuts expand to select the current word.
+ * @param text - The text content
+ * @param offset - The cursor offset
+ * @returns Object with start and end offsets of the word
+ */
+function getWordBoundaries(text: string, offset: number): { start: number; end: number } {
+    // Word boundary regex - matches word characters (letters, numbers, underscores)
+    const wordChar = /[\w\u00C0-\u024F\u1E00-\u1EFF]/;
+
+    let start = offset;
+    let end = offset;
+
+    // Expand backwards to find word start
+    while (start > 0 && wordChar.test(text[start - 1])) {
+        start--;
+    }
+
+    // Expand forwards to find word end
+    while (end < text.length && wordChar.test(text[end])) {
+        end++;
+    }
+
+    return { start, end };
+}
+
 function isEmojiToken(token: Token): token is CodeEmojiMathToken {
     return token.type === 'emoji';
 }
@@ -1437,6 +1464,18 @@ class Format extends Content {
 
         if (start == null || end == null)
             return debug.warn('You need to special the range you want to format.');
+
+        // Typora-style behavior: expand to word boundaries when cursor is collapsed (no selection)
+        // Only for inline formats (strong, em, del, etc.), not for links/images/clear
+        const isInlineFormat = ['strong', 'em', 'del', 'u', 'mark', 'sub', 'sup', 'inline_code'].includes(type);
+        if (isInlineFormat && start.offset === end.offset) {
+            const wordBounds = getWordBoundaries(this.text, start.offset);
+            // Only expand if we found a word (start != end means there's text to format)
+            if (wordBounds.start !== wordBounds.end) {
+                start.offset = wordBounds.start;
+                end.offset = wordBounds.end;
+            }
+        }
 
         start.delta = end.delta = 0;
         const { formats, tokens, neighbors } = this.getFormatsInRange(cursor);

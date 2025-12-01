@@ -18,3 +18,6 @@ export { PreviewToolBar } from './ui/previewToolBar';
 export { TableColumnToolbar } from './ui/tableColumnToolbar';
 export { TableDragBar } from './ui/tableDragBar';
 export { TableRowColumMenu } from './ui/tableRowColumMenu';
+
+// Export block conversion utilities
+export { replaceBlockByLabel } from './ui/paragraphQuickInsertMenu/config';
