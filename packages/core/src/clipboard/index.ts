@@ -183,7 +183,7 @@ class Clipboard {
             const block = position === 'start' ? startBlock : endBlock;
             // Handle anchor and focus in different blocks
             if (
-                /block-quote|code-block|html-block|table|math-block|frontmatter|diagram/.test(
+                /block-quote|code-block|html-block|table|math-block|frontmatter|diagram|atx-heading|setext-heading/.test(
                     outBlock!.blockName,
                 )
             ) {
@@ -579,8 +579,13 @@ class Clipboard {
                     ? new HtmlToMarkdown({ bulletListMarker }).generate(html)
                     : text;
 
+            // Check for multi-block content: blank lines, multiple list items, or headings
+            const listMarkers = (markdown.match(/^[ \t]*[-*+][ \t]+|^[ \t]*\d+\.[ \t]+/gm) || []).length;
+            const startsWithHeading = /^#{1,6}[ \t]+/.test(markdown);
+            const hasMultipleBlocks = /\n\n/.test(markdown) || listMarkers >= 2 || startsWithHeading;
+
             if (
-                /\n\n/.test(markdown)
+                hasMultipleBlocks
                 && anchorBlock.blockName !== 'codeblock.content'
             ) {
                 if (start.offset !== end.offset) {
