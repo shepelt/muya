@@ -25,14 +25,18 @@ class AtxHeadingContent extends Format {
         return this.parent;
     }
 
-    override update(cursor: ICursor, highlights = []) {
+    override update(cursor?: ICursor, highlights = []) {
         return this.inlineRenderer.patch(this, cursor, highlights);
     }
 
     override enterHandler(event: Event) {
+        event.preventDefault();
         const { start, end } = this.getCursor()!;
         const { level } = this.parent!.meta;
+        const { text: oldText, muya } = this;
 
+        // Case 1: Cursor at or before the heading prefix (e.g., at or before "## ")
+        // Insert empty paragraph before heading, keep cursor in heading
         if (start.offset === end.offset && start.offset <= level + 1) {
             const newNodeState = {
                 name: 'paragraph',
@@ -40,14 +44,39 @@ class AtxHeadingContent extends Format {
             };
 
             const newParagraphBlock = ScrollPage.loadBlock(newNodeState.name).create(
-                this.muya,
+                muya,
                 newNodeState,
             );
             this.parent!.parent!.insertBefore(newParagraphBlock, this.parent);
             this.setCursor(start.offset, end.offset, true);
         }
+        // Case 2: Cursor in the middle or at end of heading text
+        // Split: keep prefix + text before cursor as heading, text after cursor becomes paragraph
         else {
-            super.enterHandler(event as KeyboardEvent);
+            // Text after cursor becomes new paragraph (no prefix)
+            const textOfNewNode = oldText.substring(end.offset);
+
+            // Keep prefix + text before cursor in the heading
+            this.text = oldText.substring(0, start.offset);
+
+            const newParagraphState = {
+                name: 'paragraph',
+                text: textOfNewNode,
+            };
+
+            const newNode = ScrollPage.loadBlock(newParagraphState.name).create(
+                muya,
+                newParagraphState,
+            );
+
+            this.parent!.parent!.insertAfter(newNode, this.parent);
+
+            // Update the heading with truncated text
+            this.update();
+
+            // Move cursor to start of new paragraph
+            const cursorBlock = newNode.firstContentInDescendant();
+            cursorBlock.setCursor(0, 0, true);
         }
     }
 

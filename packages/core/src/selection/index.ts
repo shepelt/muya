@@ -227,6 +227,11 @@ class Selection {
 
         const anchorBlock = anchorDomNode[BLOCK_DOM_PROPERTY] as Content;
         const focusBlock = focusDomNode[BLOCK_DOM_PROPERTY] as Content;
+
+        // Guard against blocks being undefined during DOM transitions (issue #27)
+        if (!anchorBlock || !focusBlock)
+            return null;
+
         const anchorPath = anchorBlock.path;
         const focusPath = focusBlock.path;
 
