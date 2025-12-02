@@ -136,7 +136,8 @@ class JSONState {
      * This is useful before getting content when you need the absolute latest state.
      */
     flush() {
-        if (this._operationCache.length === 0) return;
+        if (this._operationCache.length === 0)
+            return;
 
         const op = this._operationCache.reduce(json1.type.compose as any);
         const prevDoc = this.getState();
@@ -159,6 +160,10 @@ class JSONState {
         this._isGoing = true;
 
         requestAnimationFrame(() => {
+            if (this._operationCache.length === 0) {
+                this._isGoing = false;
+                return;
+            }
             const op = this._operationCache.reduce(json1.type.compose as any);
             const prevDoc = this.getState();
             this.apply(op);
