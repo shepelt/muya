@@ -1,32 +1,17 @@
-import plantumlEncoder from 'plantuml-encoder';
-
+// Stubbed - plantuml-encoder removed to reduce bundle size
 export default class Diagram {
     public encodedInput = '';
 
-    /**
-     * Builds a Diagram object storing the encoded input value
-     */
-    static parse(input: string) {
-        const diagram = new Diagram();
-        diagram.encode(input);
-
-        return diagram;
+    static parse(_input: string) {
+        console.warn('PlantUML rendering not available client-side');
+        return new Diagram();
     }
 
-    /**
-     * Encodes a diagram following PlantUML specs, I used `plantuml-encoder` at last.
-     *
-     * From https://plantuml.com/text-encoding
-     * 1. Encoded in UTF-8
-     * 2. Compressed using Deflate or Brotli algorithm
-     * 3. Re-encoded in ASCII using a transformation close to base64
-     */
-    encode(value: string) {
-        this.encodedInput = plantumlEncoder.encode(value);
+    encode(_value: string) {
+        // No-op
     }
 
     insertImgElement(container: string | HTMLElement) {
-        const PLANTUML_URL = 'https://www.plantuml.com/plantuml';
         const div
             = typeof container === 'string'
                 ? document.getElementById(container)
@@ -34,8 +19,6 @@ export default class Diagram {
         if (div === null || !div.tagName)
             throw new Error(`Invalid container: ${container}`);
 
-        const src = `${PLANTUML_URL}/svg/${this.encodedInput}`;
-
-        div.innerHTML = `<img src="${src}" >`;
+        div.innerHTML = '<div class="diagram-unsupported">PlantUML not available (use server-side rendering)</div>';
     }
 }

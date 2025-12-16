@@ -1,25 +1,24 @@
 const rendererCache = new Map();
+
+// Stub renderer for removed diagram types - returns placeholder
+const stubRenderer = {
+    render: async () => '<div class="diagram-unsupported">Diagram rendering not available (use server-side rendering)</div>',
+};
+
 /**
  *
  * @param {string} name the renderer name:plantuml, mermaid, vega-lite
  */
 async function loadRenderer(name: string) {
     if (!rendererCache.has(name)) {
-        let m;
         switch (name) {
             case 'plantuml':
-                m = await import('./plantuml');
-                rendererCache.set(name, m.default);
-                break;
-
             case 'mermaid':
-                m = await import('mermaid');
-                rendererCache.set(name, m.default);
-                break;
-
             case 'vega-lite':
-                m = await import('vega-embed');
-                rendererCache.set(name, m.default);
+                // These renderers have been removed to reduce bundle size
+                // Consider using server-side rendering for these diagram types
+                console.warn(`Diagram type "${name}" is not available client-side`);
+                rendererCache.set(name, stubRenderer);
                 break;
 
             default:
