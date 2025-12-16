@@ -1,4 +1,4 @@
-import katex from 'katex';
+// Stubbed - KaTeX removed to reduce bundle size
 
 export interface IMathToken {
     type: 'inlineMath' | 'multiplemath';
@@ -34,24 +34,23 @@ export default function (options: IOptions = {}) {
     };
 }
 
-function createRenderer(options: IOptions, newlineAfter: boolean) {
+function createRenderer(_options: IOptions, newlineAfter: boolean) {
     return (token: IMathToken) => {
-        const { useKatexRender, ...otherOpts } = options;
-        const { type, text, displayMode, mathStyle } = token;
-        if (useKatexRender) {
-            return (
-                katex.renderToString(text, {
-                    ...otherOpts,
-                    displayMode,
-                }) + (newlineAfter ? '\n' : '')
-            );
-        }
-        else {
-            return type === 'inlineMath'
-                ? `$${text}$`
-                : `<pre class="multiple-math" data-math-style="${mathStyle}">${text}</pre>\n`;
-        }
+        const { type, text, mathStyle } = token;
+        // Always return raw math (KaTeX rendering disabled)
+        return type === 'inlineMath'
+            ? `<code class="math-raw">${escapeHtml(text)}</code>`
+            : `<pre class="multiple-math math-raw" data-math-style="${mathStyle}">${escapeHtml(text)}</pre>${newlineAfter ? '\n' : ''}`;
     };
+}
+
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function inlineKatex(renderer: (token: IMathToken) => string) {

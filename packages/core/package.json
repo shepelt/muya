@@ -58,7 +58,6 @@
         "fuse.js": "^7.1.0",
         "html-tags": "^5.1.0",
         "joplin-turndown-plugin-gfm": "^1.0.12",
-        "katex": "0.16.25",
         "marked": "^16.4.2",
         "marked-highlight": "^2.2.3",
         "ot-json1": "^1.0.2",
@@ -70,7 +69,6 @@
         "turndown": "^7.2.0"
     },
     "devDependencies": {
-        "@types/katex": "^0.16.7",
         "@types/node": "^25.0.2",
         "@types/prismjs": "^1.26.3",
         "@types/turndown": "^5.0.4",

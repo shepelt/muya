@@ -1,11 +1,7 @@
+// Stubbed - KaTeX removed to reduce bundle size
 import type { CodeEmojiMathToken, ISyntaxRenderOptions } from '../types';
 import type Renderer from './index';
-import katex from 'katex';
 import { CLASS_NAMES } from '../../config';
-import { htmlToVNode } from '../../utils/snabbdom';
-import 'katex/dist/contrib/mhchem.min.js';
-
-import 'katex/dist/katex.min.css';
 
 export default function inlineMath(this: Renderer, {
     h,
@@ -15,7 +11,6 @@ export default function inlineMath(this: Renderer, {
     outerClass,
 }: ISyntaxRenderOptions & { token: CodeEmojiMathToken }) {
     const className = this.getClassName(outerClass, block, token, cursor);
-    const { i18n } = this.muya;
     const mathSelector
         = className === CLASS_NAMES.MU_HIDE
             ? `span.${className}.${CLASS_NAMES.MU_MATH}`
@@ -40,30 +35,11 @@ export default function inlineMath(this: Renderer, {
         token,
     );
 
-    const { content: math, type } = token;
+    const { content: math } = token;
 
-    const { loadMathMap } = this;
-
-    const displayMode = false;
-    const key = `${math}_${type}`;
-    let mathVnode = null;
-    let previewSelector = `span.${CLASS_NAMES.MU_MATH_RENDER}`;
-    if (loadMathMap.has(key)) {
-        mathVnode = loadMathMap.get(key);
-    }
-    else {
-        try {
-            const html = katex.renderToString(math, {
-                displayMode,
-            });
-            mathVnode = htmlToVNode(html);
-            loadMathMap.set(key, mathVnode);
-        }
-        catch (err) {
-            mathVnode = `<${i18n.t('Invalid Mathematical Formula')}>`;
-            previewSelector += `.${CLASS_NAMES.MU_MATH_ERROR}`;
-        }
-    }
+    // Show raw math text instead of rendered KaTeX
+    const mathVnode = math;
+    const previewSelector = `span.${CLASS_NAMES.MU_MATH_RENDER}`;
 
     return [
         h(`span.${className}.${CLASS_NAMES.MU_MATH_MARKER}`, startMarker),
@@ -79,9 +55,10 @@ export default function inlineMath(this: Renderer, {
                 previewSelector,
                 {
                     attrs: { contenteditable: 'false' },
+                    style: { fontFamily: 'monospace', background: '#f5f5f5', padding: '2px 4px', borderRadius: '2px' },
                     dataset: {
-                        start: String(start + 1), // '$'.length
-                        end: String(end - 1), // '$'.length
+                        start: String(start + 1),
+                        end: String(end - 1),
                     },
                 },
                 mathVnode,
